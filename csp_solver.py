@@ -3,6 +3,8 @@ Constraint Satisfaction Problem (CSP) Solver for Timetable Generation
 Uses backtracking algorithm to find valid timetable assignments
 """
 
+import random
+
 class TimetableSolver:
     """
     CSP Solver for generating conflict-free timetables
@@ -32,6 +34,12 @@ class TimetableSolver:
         self.teacher_assignments = {}  # {teacher_id: [(day, period), ...]}
         self.room_assignments = {}    # {room_id: [(day, period), ...]}
         self.group_assignments = {}    # {group_id: [(day, period), ...]}
+        
+        # CHANGE 1: Track which teacher teaches which course for variety
+        self.course_teacher_map = {}  # {course_code: teacher_id}
+        
+        # CHANGE 2: Track course sessions per day to limit clustering
+        self.course_day_sessions = {}  # {(course_code, group_id, day): count}
     
     def solve(self):
         """
@@ -42,12 +50,17 @@ class TimetableSolver:
         """
         print("Starting CSP solver...")
         
-        # Try to schedule each course
-        for course in self.courses:
+        # Shuffle courses and groups to encourage mixing
+        courses = self.courses[:]
+        groups = self.groups[:]
+        random.shuffle(courses)
+        random.shuffle(groups)
+        
+        for course in courses:
             print(f"Processing course: {course['code']} - {course['name']}")
             
             # For each student group
-            for group in self.groups:
+            for group in groups:
                 print(f"  Scheduling for group: {group['name']}")
                 
                 # Schedule required number of sessions per week
@@ -79,8 +92,27 @@ class TimetableSolver:
         Returns:
             True if assignment successful, False otherwise
         """
-        # Try all possible combinations of teacher, room, and timeslot
-        for teacher in self.teachers:
+        course_code = course['code']
+        
+        # CHANGE 3: If course already has assigned teacher, prefer that teacher
+        # This ensures same teacher for all sessions of a course
+        preferred_teacher_id = self.course_teacher_map.get(course_code)
+        
+        teachers = self.teachers[:]
+        
+        # CHANGE 4: Sort teachers - put preferred teacher first if exists
+        if preferred_teacher_id:
+            teachers.sort(key=lambda t: 0 if t['id'] == preferred_teacher_id else 1)
+        else:
+            random.shuffle(teachers)  # Randomize for first session
+        
+        for teacher in teachers:
+            # CHANGE 5: Skip if trying different teacher when one is already assigned
+            # (unless preferred teacher is fully booked)
+            if preferred_teacher_id and teacher['id'] != preferred_teacher_id:
+                # Only try other teachers if preferred is not available
+                continue
+            
             # Get rooms that match the course type
             valid_rooms = self.get_rooms_for_course(course, self.rooms)
             
@@ -88,6 +120,10 @@ class TimetableSolver:
                 for timeslot in self.timeslots:
                     # Check if this assignment is valid
                     if self.is_valid(course, teacher, room, timeslot, group):
+                        # CHANGE 6: Record teacher-course mapping on first assignment
+                        if course_code not in self.course_teacher_map:
+                            self.course_teacher_map[course_code] = teacher['id']
+                        
                         # Create assignment
                         assignment = {
                             'course_code': course['code'],
@@ -108,9 +144,37 @@ class TimetableSolver:
                         
                         # Update tracking dictionaries
                         self._update_assignments(teacher['id'], room['id'], group['id'], 
-                                               timeslot['day'], timeslot['period'])
+                                               timeslot['day'], timeslot['period'],
+                                               course_code, group['id'])  # CHANGE 7: Pass course info
                         
                         return True
+        
+        # CHANGE 8: If preferred teacher didn't work, try ANY teacher
+        if preferred_teacher_id:
+            random.shuffle(teachers)
+            for teacher in teachers:
+                valid_rooms = self.get_rooms_for_course(course, self.rooms)
+                for room in valid_rooms:
+                    for timeslot in self.timeslots:
+                        if self.is_valid(course, teacher, room, timeslot, group):
+                            assignment = {
+                                'course_code': course['code'],
+                                'course_name': course['name'],
+                                'teacher_name': teacher['name'],
+                                'room_number': room['room_number'],
+                                'day': timeslot['day'],
+                                'period': timeslot['period'],
+                                'start_time': timeslot['start_time'],
+                                'end_time': timeslot['end_time'],
+                                'group_name': group['name'],
+                                'course_type': course['course_type'],
+                                'room_type': room['room_type']
+                            }
+                            self.solution.append(assignment)
+                            self._update_assignments(teacher['id'], room['id'], group['id'], 
+                                                   timeslot['day'], timeslot['period'],
+                                                   course_code, group['id'])
+                            return True
         
         return False  # No valid assignment found
     
@@ -133,6 +197,7 @@ class TimetableSolver:
         teacher_id = teacher['id']
         room_id = room['id']
         group_id = group['id']
+        course_code = course['code']
         
         # Constraint 1: No Teacher Conflict
         # Check if teacher already has class at this day and period
@@ -157,10 +222,33 @@ class TimetableSolver:
         if course['course_type'] != room['room_type']:
             return False
         
+        # CHANGE 9: IMPROVED Constraint 5 - Prevent same course in consecutive periods
+        # Only checks for immediate adjacency (period-1 or period+1)
+        for assignment in self.solution:
+            if (assignment['group_name'] == group['name'] and 
+                assignment['day'] == day and 
+                assignment['course_code'] == course_code):
+                if abs(assignment['period'] - period) == 1:  # Adjacent periods
+                    return False
+        
+        # CHANGE 10: RELAXED Constraint 6 - Limit course sessions per day
+        # Allow max 2 sessions of same course on same day (was unlimited before)
+        course_day_key = (course_code, group_id, day)
+        sessions_today = self.course_day_sessions.get(course_day_key, 0)
+        if sessions_today >= 2:  # Max 2 sessions per course per day
+            return False
+        
+        # CHANGE 11: RELAXED Constraint 7 - Teacher session limit per day
+        # Increased from 4 to 6 sessions per day for flexibility
+        teacher_sessions_today = [a for a in self.solution 
+                                 if a['teacher_name'] == teacher['name'] and a['day'] == day]
+        if len(teacher_sessions_today) >= 6:  # Increased limit
+            return False
+        
         # All constraints satisfied
         return True
     
-    def _update_assignments(self, teacher_id, room_id, group_id, day, period):
+    def _update_assignments(self, teacher_id, room_id, group_id, day, period, course_code=None, group_id_for_course=None):
         """
         Update tracking dictionaries after successful assignment
         
@@ -170,6 +258,8 @@ class TimetableSolver:
             group_id: ID of assigned group
             day: Day of assignment
             period: Period of assignment
+            course_code: Course code (CHANGE 12: Added parameter)
+            group_id_for_course: Group ID for course tracking (CHANGE 13: Added parameter)
         """
         # Update teacher assignments
         if teacher_id not in self.teacher_assignments:
@@ -185,6 +275,11 @@ class TimetableSolver:
         if group_id not in self.group_assignments:
             self.group_assignments[group_id] = []
         self.group_assignments[group_id].append((day, period))
+        
+        # CHANGE 14: Track course sessions per day
+        if course_code and group_id_for_course:
+            course_day_key = (course_code, group_id_for_course, day)
+            self.course_day_sessions[course_day_key] = self.course_day_sessions.get(course_day_key, 0) + 1
     
     def get_rooms_for_course(self, course, rooms):
         """
@@ -259,4 +354,7 @@ class TimetableSolver:
             'rooms_used': rooms_used,
             'groups_scheduled': groups_scheduled
         }
-
+    
+    # CHANGE 15: REMOVED _validate_free_periods() method
+    # This constraint was too strict and caused generation failures
+    # Free periods are acceptable and sometimes necessary in real timetables

@@ -1,32 +1,20 @@
 [
   {
-    "id": "1759629245315_3534",
+    "id": "1759644848540_4521",
     "name": "CS-A",
     "semester": 3,
     "department": "Computer Science"
   },
   {
-    "id": "1759629245315_3590",
+    "id": "1759644848540_7339",
     "name": "CS-B",
     "semester": 3,
     "department": "Computer Science"
   },
   {
-    "id": "1759629245315_7500",
+    "id": "1759644848540_6692",
     "name": "IT-A",
     "semester": 3,
     "department": "Information Technology"
-  },
-  {
-    "id": "1759629401572_2761",
-    "name": "AIDS-A",
-    "semester": 2,
-    "department": "Computer Science"
-  },
-  {
-    "id": "1759629436843_1272",
-    "name": "AIML-A",
-    "semester": 4,
-    "department": "Computer Science"
   }
 ]

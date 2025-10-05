@@ -1,34 +1,34 @@
 [
   {
-    "id": "1759629245315_9265",
+    "id": "1759644848540_4031",
     "code": "CS101",
     "name": "Data Structures",
     "sessions_per_week": 3,
     "course_type": "Theory"
   },
   {
-    "id": "1759629245315_9872",
+    "id": "1759644848540_1620",
     "code": "CS102",
     "name": "Database Lab",
     "sessions_per_week": 2,
     "course_type": "Lab"
   },
   {
-    "id": "1759629245315_6820",
+    "id": "1759644848540_1775",
     "code": "CS103",
     "name": "Algorithms",
     "sessions_per_week": 3,
     "course_type": "Theory"
   },
   {
-    "id": "1759629245315_1590",
+    "id": "1759644848540_9188",
     "code": "CS104",
     "name": "Web Technology",
     "sessions_per_week": 3,
     "course_type": "Theory"
   },
   {
-    "id": "1759629245315_2697",
+    "id": "1759644848540_8700",
     "code": "CS105",
     "name": "Programming Lab",
     "sessions_per_week": 2,
