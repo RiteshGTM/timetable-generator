@@ -1,0 +1,219 @@
+[
+  {
+    "id": "1759629245315_6166",
+    "day": "Monday",
+    "period": 1,
+    "start_time": "09:00",
+    "end_time": "10:00"
+  },
+  {
+    "id": "1759629245315_9600",
+    "day": "Monday",
+    "period": 2,
+    "start_time": "10:00",
+    "end_time": "11:00"
+  },
+  {
+    "id": "1759629245315_3893",
+    "day": "Monday",
+    "period": 3,
+    "start_time": "11:00",
+    "end_time": "12:00"
+  },
+  {
+    "id": "1759629245315_4658",
+    "day": "Monday",
+    "period": 4,
+    "start_time": "12:00",
+    "end_time": "13:00"
+  },
+  {
+    "id": "1759629245315_3720",
+    "day": "Monday",
+    "period": 5,
+    "start_time": "13:00",
+    "end_time": "14:00"
+  },
+  {
+    "id": "1759629245315_1109",
+    "day": "Tuesday",
+    "period": 1,
+    "start_time": "09:00",
+    "end_time": "10:00"
+  },
+  {
+    "id": "1759629245315_9543",
+    "day": "Tuesday",
+    "period": 2,
+    "start_time": "10:00",
+    "end_time": "11:00"
+  },
+  {
+    "id": "1759629245315_9046",
+    "day": "Tuesday",
+    "period": 3,
+    "start_time": "11:00",
+    "end_time": "12:00"
+  },
+  {
+    "id": "1759629245315_7005",
+    "day": "Tuesday",
+    "period": 4,
+    "start_time": "12:00",
+    "end_time": "13:00"
+  },
+  {
+    "id": "1759629245315_2060",
+    "day": "Tuesday",
+    "period": 5,
+    "start_time": "13:00",
+    "end_time": "14:00"
+  },
+  {
+    "id": "1759629245315_6886",
+    "day": "Wednesday",
+    "period": 1,
+    "start_time": "09:00",
+    "end_time": "10:00"
+  },
+  {
+    "id": "1759629245315_9759",
+    "day": "Wednesday",
+    "period": 2,
+    "start_time": "10:00",
+    "end_time": "11:00"
+  },
+  {
+    "id": "1759629245315_2407",
+    "day": "Wednesday",
+    "period": 3,
+    "start_time": "11:00",
+    "end_time": "12:00"
+  },
+  {
+    "id": "1759629245315_6721",
+    "day": "Wednesday",
+    "period": 4,
+    "start_time": "12:00",
+    "end_time": "13:00"
+  },
+  {
+    "id": "1759629245315_4693",
+    "day": "Wednesday",
+    "period": 5,
+    "start_time": "13:00",
+    "end_time": "14:00"
+  },
+  {
+    "id": "1759629245315_2067",
+    "day": "Thursday",
+    "period": 1,
+    "start_time": "09:00",
+    "end_time": "10:00"
+  },
+  {
+    "id": "1759629245315_2360",
+    "day": "Thursday",
+    "period": 2,
+    "start_time": "10:00",
+    "end_time": "11:00"
+  },
+  {
+    "id": "1759629245315_4160",
+    "day": "Thursday",
+    "period": 3,
+    "start_time": "11:00",
+    "end_time": "12:00"
+  },
+  {
+    "id": "1759629245315_2929",
+    "day": "Thursday",
+    "period": 4,
+    "start_time": "12:00",
+    "end_time": "13:00"
+  },
+  {
+    "id": "1759629245315_6509",
+    "day": "Thursday",
+    "period": 5,
+    "start_time": "13:00",
+    "end_time": "14:00"
+  },
+  {
+    "id": "1759629245315_6082",
+    "day": "Thursday",
+    "period": 6,
+    "start_time": "14:00",
+    "end_time": "15:00"
+  },
+  {
+    "id": "1759629245315_6827",
+    "day": "Thursday",
+    "period": 7,
+    "start_time": "15:00",
+    "end_time": "16:00"
+  },
+  {
+    "id": "1759629245315_1118",
+    "day": "Thursday",
+    "period": 8,
+    "start_time": "16:00",
+    "end_time": "17:00"
+  },
+  {
+    "id": "1759629245315_6147",
+    "day": "Friday",
+    "period": 1,
+    "start_time": "09:00",
+    "end_time": "10:00"
+  },
+  {
+    "id": "1759629245315_1651",
+    "day": "Friday",
+    "period": 2,
+    "start_time": "10:00",
+    "end_time": "11:00"
+  },
+  {
+    "id": "1759629245315_4458",
+    "day": "Friday",
+    "period": 3,
+    "start_time": "11:00",
+    "end_time": "12:00"
+  },
+  {
+    "id": "1759629245315_4978",
+    "day": "Friday",
+    "period": 4,
+    "start_time": "12:00",
+    "end_time": "13:00"
+  },
+  {
+    "id": "1759629245315_8924",
+    "day": "Friday",
+    "period": 5,
+    "start_time": "13:00",
+    "end_time": "14:00"
+  },
+  {
+    "id": "1759629245315_8052",
+    "day": "Friday",
+    "period": 6,
+    "start_time": "14:00",
+    "end_time": "15:00"
+  },
+  {
+    "id": "1759629245315_1798",
+    "day": "Friday",
+    "period": 7,
+    "start_time": "15:00",
+    "end_time": "16:00"
+  },
+  {
+    "id": "1759629245315_2162",
+    "day": "Friday",
+    "period": 8,
+    "start_time": "16:00",
+    "end_time": "17:00"
+  }
+]

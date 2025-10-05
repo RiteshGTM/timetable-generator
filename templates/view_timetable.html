@@ -1,0 +1,389 @@
+{% extends "base.html" %}
+
+{% block title %}View Timetable - SmartTable{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{{ url_for('index') }}">Dashboard</a></li>
+<li class="breadcrumb-item active">View Timetable</li>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="page-header">
+    <div class="container-fluid">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1><i class="fas fa-table me-3"></i>Generated Timetable</h1>
+                <p>View your generated timetable in different formats</p>
+            </div>
+            <div>
+                <a href="{{ url_for('generate') }}" class="btn btn-primary">
+                    <i class="fas fa-bolt me-2"></i>Generate New
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Empty State -->
+<div id="emptyState" class="row" style="display: none;">
+    <div class="col-12">
+        <div class="coming-soon">
+            <div class="icon">
+                <i class="fas fa-table"></i>
+            </div>
+            <h3>No Timetable Generated Yet</h3>
+            <p>Generate a timetable first to view it here.</p>
+            <div class="mt-4">
+                <a href="{{ url_for('generate') }}" class="btn btn-primary">
+                    <i class="fas fa-bolt me-2"></i>Generate Timetable
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Timetable Content -->
+<div id="timetableContent" style="display: none;">
+    <!-- Tab Navigation -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <ul class="nav nav-tabs" id="timetableTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="group-tab" data-bs-toggle="tab" data-bs-target="#group-view" type="button" role="tab">
+                        <i class="fas fa-users me-2"></i>Group-wise Timetable
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="teacher-tab" data-bs-toggle="tab" data-bs-target="#teacher-view" type="button" role="tab">
+                        <i class="fas fa-user me-2"></i>Teacher-wise Timetable
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="room-tab" data-bs-toggle="tab" data-bs-target="#room-view" type="button" role="tab">
+                        <i class="fas fa-door-open me-2"></i>Room-wise Timetable
+                    </button>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Tab Content -->
+    <div class="tab-content" id="timetableTabContent">
+        <!-- Group-wise View -->
+        <div class="tab-pane fade show active" id="group-view" role="tabpanel">
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <label for="groupSelect" class="form-label">Select Group:</label>
+                    <select class="form-select" id="groupSelect">
+                        <option value="">Choose a group...</option>
+                    </select>
+                </div>
+            </div>
+            <div class="timetable-container">
+                <div id="groupTimetable"></div>
+            </div>
+        </div>
+
+        <!-- Teacher-wise View -->
+        <div class="tab-pane fade" id="teacher-view" role="tabpanel">
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <label for="teacherSelect" class="form-label">Select Teacher:</label>
+                    <select class="form-select" id="teacherSelect">
+                        <option value="">Choose a teacher...</option>
+                    </select>
+                </div>
+            </div>
+            <div class="timetable-container">
+                <div id="teacherTimetable"></div>
+            </div>
+        </div>
+
+        <!-- Room-wise View -->
+        <div class="tab-pane fade" id="room-view" role="tabpanel">
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <label for="roomSelect" class="form-label">Select Room:</label>
+                    <select class="form-select" id="roomSelect">
+                        <option value="">Choose a room...</option>
+                    </select>
+                </div>
+            </div>
+            <div class="timetable-container">
+                <div id="roomTimetable"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Global variables
+let timetableData = [];
+let groups = [];
+let teachers = [];
+let rooms = [];
+
+// Load timetable data on page load
+document.addEventListener('DOMContentLoaded', function() {
+    loadTimetableData();
+    
+    // Event listeners for dropdowns
+    document.getElementById('groupSelect').addEventListener('change', function() {
+        if (this.value) {
+            displayGroupTimetable(this.value);
+        }
+    });
+    
+    document.getElementById('teacherSelect').addEventListener('change', function() {
+        if (this.value) {
+            displayTeacherTimetable(this.value);
+        }
+    });
+    
+    document.getElementById('roomSelect').addEventListener('change', function() {
+        if (this.value) {
+            displayRoomTimetable(this.value);
+        }
+    });
+});
+
+// Load timetable data from API
+async function loadTimetableData() {
+    try {
+        const response = await fetch('/api/timetable');
+        
+        if (!response.ok) {
+            if (response.status === 404) {
+                showEmptyState('No timetable found. Please generate a timetable first.');
+                return;
+            }
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        timetableData = await response.json();
+        
+        if (!timetableData || timetableData.length === 0) {
+            showEmptyState('No timetable data available. Please generate a timetable first.');
+            return;
+        }
+        
+        // Load reference data
+        const [groupsResponse, teachersResponse, roomsResponse] = await Promise.all([
+            fetch('/api/groups'),
+            fetch('/api/teachers'),
+            fetch('/api/rooms')
+        ]);
+        
+        groups = await groupsResponse.json();
+        teachers = await teachersResponse.json();
+        rooms = await roomsResponse.json();
+        
+        // Populate dropdowns
+        populateDropdowns();
+        
+        // Show timetable content
+        document.getElementById('emptyState').style.display = 'none';
+        document.getElementById('timetableContent').style.display = 'block';
+        
+        // Display default view (first group)
+        if (groups.length > 0) {
+            document.getElementById('groupSelect').value = groups[0].name;
+            displayGroupTimetable(groups[0].name);
+        }
+        
+    } catch (error) {
+        console.error('Error loading timetable data:', error);
+        showError(`Failed to load timetable data: ${error.message}`);
+    }
+}
+
+// Show empty state with custom message
+function showEmptyState(message = 'No timetable generated yet') {
+    document.getElementById('emptyState').style.display = 'block';
+    document.getElementById('timetableContent').style.display = 'none';
+    
+    // Update empty state message
+    const emptyState = document.getElementById('emptyState');
+    const messageElement = emptyState.querySelector('p');
+    if (messageElement) {
+        messageElement.textContent = message;
+    }
+}
+
+// Show error message
+function showError(message) {
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'alert alert-danger';
+    errorDiv.innerHTML = `
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        ${message}
+    `;
+    
+    const content = document.getElementById('timetableContent');
+    content.innerHTML = '';
+    content.appendChild(errorDiv);
+    content.style.display = 'block';
+    document.getElementById('emptyState').style.display = 'none';
+}
+
+// Populate dropdown options
+function populateDropdowns() {
+    // Populate group dropdown
+    const groupSelect = document.getElementById('groupSelect');
+    groups.forEach(group => {
+        const option = document.createElement('option');
+        option.value = group.name;
+        option.textContent = group.name;
+        groupSelect.appendChild(option);
+    });
+    
+    // Populate teacher dropdown
+    const teacherSelect = document.getElementById('teacherSelect');
+    teachers.forEach(teacher => {
+        const option = document.createElement('option');
+        option.value = teacher.name;
+        option.textContent = teacher.name;
+        teacherSelect.appendChild(option);
+    });
+    
+    // Populate room dropdown
+    const roomSelect = document.getElementById('roomSelect');
+    rooms.forEach(room => {
+        const option = document.createElement('option');
+        option.value = room.room_number;
+        option.textContent = room.room_number;
+        roomSelect.appendChild(option);
+    });
+}
+
+// Display group timetable
+function displayGroupTimetable(groupName) {
+    const container = document.getElementById('groupTimetable');
+    const groupData = timetableData.filter(item => item.group_name === groupName);
+    
+    if (groupData.length === 0) {
+        container.innerHTML = '<div class="alert alert-info">No classes scheduled for this group.</div>';
+        return;
+    }
+    
+    container.innerHTML = generateTimetableHTML(groupData, 'group');
+}
+
+// Display teacher timetable
+function displayTeacherTimetable(teacherName) {
+    const container = document.getElementById('teacherTimetable');
+    const teacherData = timetableData.filter(item => item.teacher_name === teacherName);
+    
+    if (teacherData.length === 0) {
+        container.innerHTML = '<div class="alert alert-info">No classes scheduled for this teacher.</div>';
+        return;
+    }
+    
+    container.innerHTML = generateTimetableHTML(teacherData, 'teacher');
+}
+
+// Display room timetable
+function displayRoomTimetable(roomNumber) {
+    const container = document.getElementById('roomTimetable');
+    const roomData = timetableData.filter(item => item.room_number === roomNumber);
+    
+    if (roomData.length === 0) {
+        container.innerHTML = '<div class="alert alert-info">No classes scheduled in this room.</div>';
+        return;
+    }
+    
+    container.innerHTML = generateTimetableHTML(roomData, 'room');
+}
+
+// Generate timetable HTML
+function generateTimetableHTML(data, viewType) {
+    const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+    const periods = [
+        { period: 1, time: '09:00-10:00' },
+        { period: 2, time: '10:00-11:00' },
+        { period: 3, time: '11:00-12:00' },
+        { period: 4, time: '12:00-13:00' },
+        { period: 5, time: '13:00-14:00' },
+        { period: 6, time: '14:00-15:00' },
+        { period: 7, time: '15:00-16:00' },
+        { period: 8, time: '16:00-17:00' }
+    ];
+    
+    let html = '<div class="timetable-table">';
+    html += '<table class="table table-bordered timetable-table">';
+    
+    // Header row
+    html += '<thead class="table-dark">';
+    html += '<tr><th>Period/Time</th>';
+    days.forEach(day => {
+        html += `<th>${day}</th>`;
+    });
+    html += '</tr></thead>';
+    
+    // Body rows
+    html += '<tbody>';
+    periods.forEach(period => {
+        html += '<tr>';
+        html += `<td class="period-cell"><strong>Period ${period.period}</strong><br><small class="text-muted">${period.time}</small></td>`;
+        
+        days.forEach(day => {
+            const classData = data.find(item => item.day === day && item.period === period.period);
+            if (classData) {
+                html += `<td class="class-cell ${getCourseColor(classData.course_code)}">`;
+                html += `<div class="class-content">`;
+                html += `<div class="course-name"><strong>${classData.course_name}</strong></div>`;
+                html += `<div class="course-details">`;
+                if (viewType === 'group') {
+                    html += `<div class="teacher-name">${classData.teacher_name}</div>`;
+                    html += `<div class="room-number">Room: ${classData.room_number}</div>`;
+                } else if (viewType === 'teacher') {
+                    html += `<div class="group-name">${classData.group_name}</div>`;
+                    html += `<div class="room-number">Room: ${classData.room_number}</div>`;
+                } else if (viewType === 'room') {
+                    html += `<div class="teacher-name">${classData.teacher_name}</div>`;
+                    html += `<div class="group-name">${classData.group_name}</div>`;
+                }
+                html += `<div class="time-display">${formatTime(classData.start_time)} - ${formatTime(classData.end_time)}</div>`;
+                html += `</div></div></td>`;
+            } else {
+                html += '<td class="empty-cell"><div class="free-period">Free Period</div></td>';
+            }
+        });
+        html += '</tr>';
+    });
+    html += '</tbody>';
+    html += '</table>';
+    html += '</div>';
+    
+    return html;
+}
+
+// Get course color for styling
+function getCourseColor(courseCode) {
+    const colors = {
+        'CS101': 'course-blue',
+        'CS102': 'course-green',
+        'CS103': 'course-orange',
+        'CS104': 'course-purple',
+        'CS105': 'course-red',
+        'CS106': 'course-teal',
+        'CS107': 'course-pink',
+        'CS108': 'course-indigo',
+        'CS109': 'course-yellow',
+        'CS110': 'course-gray'
+    };
+    return colors[courseCode] || 'course-default';
+}
+
+// Format time to 12-hour format
+function formatTime(time24) {
+    const [hours, minutes] = time24.split(':');
+    const hour = parseInt(hours);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const hour12 = hour % 12 || 12;
+    return `${hour12}:${minutes} ${ampm}`;
+}
+</script>
+{% endblock %}
+

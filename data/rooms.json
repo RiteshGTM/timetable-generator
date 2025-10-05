@@ -1,0 +1,26 @@
+[
+  {
+    "id": "1759629245315_5624",
+    "room_number": "A101",
+    "capacity": 60,
+    "room_type": "Theory"
+  },
+  {
+    "id": "1759629245315_6546",
+    "room_number": "A102",
+    "capacity": 60,
+    "room_type": "Theory"
+  },
+  {
+    "id": "1759629245315_2701",
+    "room_number": "Lab1",
+    "capacity": 30,
+    "room_type": "Lab"
+  },
+  {
+    "id": "1759629245315_6594",
+    "room_number": "Lab2",
+    "capacity": 30,
+    "room_type": "Lab"
+  }
+]

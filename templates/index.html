@@ -1,0 +1,224 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - SmartTable{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item active">Dashboard</li>
+{% endblock %}
+
+{% block content %}
+<!-- Welcome Section -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="page-header">
+            <div class="container-fluid">
+                <h1><i class="fas fa-calendar-alt me-3"></i>Welcome to SmartTable</h1>
+                <p>Intelligent Timetable Generation using Constraint Satisfaction Problem (CSP) Algorithm</p>
+                <div class="alert alert-info border-0 shadow-sm mt-3">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-info-circle me-3 text-primary"></i>
+                        <div>
+                            <strong>Getting Started:</strong> Add courses, teachers, rooms, and time slots, then generate your timetable automatically!
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-5">
+    <div class="col-lg-3 col-md-6 mb-4">
+        <div class="stat-card blue">
+            <div class="icon">
+                <i class="fas fa-book"></i>
+            </div>
+            <div class="number" id="coursesCount">0</div>
+            <div class="label">Total Courses</div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-4">
+        <div class="stat-card green">
+            <div class="icon">
+                <i class="fas fa-user"></i>
+            </div>
+            <div class="number" id="teachersCount">0</div>
+            <div class="label">Total Teachers</div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-4">
+        <div class="stat-card orange">
+            <div class="icon">
+                <i class="fas fa-door-open"></i>
+            </div>
+            <div class="number" id="roomsCount">0</div>
+            <div class="label">Total Rooms</div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-4">
+        <div class="stat-card purple">
+            <div class="icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="number" id="groupsCount">0</div>
+            <div class="label">Total Groups</div>
+        </div>
+    </div>
+</div>
+
+<!-- Action Buttons -->
+<div class="row mb-5">
+    <div class="col-12 text-center">
+        <div class="d-flex flex-column flex-md-row justify-content-center gap-3">
+            <a href="{{ url_for('courses') }}" class="action-btn primary">
+                <i class="fas fa-cog me-2"></i>Manage Data
+            </a>
+            <a href="{{ url_for('generate') }}" class="action-btn secondary">
+                <i class="fas fa-bolt me-2"></i>Generate Timetable
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="row">
+    <div class="col-12">
+        <h2 class="text-center mb-5">Key Features</h2>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-4">
+        <div class="feature-card">
+            <div class="icon">
+                <i class="fas fa-brain"></i>
+            </div>
+            <h4>CSP Algorithm</h4>
+            <p>Advanced Constraint Satisfaction Problem algorithm ensures optimal timetable generation with minimal conflicts.</p>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-4">
+        <div class="feature-card">
+            <div class="icon">
+                <i class="fas fa-shield-alt"></i>
+            </div>
+            <h4>Conflict-Free</h4>
+            <p>Automatically detects and prevents scheduling conflicts between teachers, rooms, and time slots.</p>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-4">
+        <div class="feature-card">
+            <div class="icon">
+                <i class="fas fa-mouse-pointer"></i>
+            </div>
+            <h4>Easy to Use</h4>
+            <p>Intuitive interface makes it simple to manage courses, teachers, rooms, and generate timetables.</p>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-4">
+        <div class="feature-card">
+            <div class="icon">
+                <i class="fas fa-tachometer-alt"></i>
+            </div>
+            <h4>Fast Generation</h4>
+            <p>Optimized algorithms generate complex timetables in seconds, saving hours of manual work.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Start Guide -->
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-rocket me-2"></i>Quick Start Guide</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                                <span class="fw-bold">1</span>
+                            </div>
+                            <div>
+                                <h6 class="mb-1">Add Courses</h6>
+                                <small class="text-muted">Start by adding your courses</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                                <span class="fw-bold">2</span>
+                            </div>
+                            <div>
+                                <h6 class="mb-1">Add Teachers & Rooms</h6>
+                                <small class="text-muted">Configure teachers and available rooms</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                                <span class="fw-bold">3</span>
+                            </div>
+                            <div>
+                                <h6 class="mb-1">Generate Timetable</h6>
+                                <small class="text-muted">Let the algorithm create your timetable</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Load dashboard statistics
+document.addEventListener('DOMContentLoaded', function() {
+    loadDashboardStats();
+});
+
+// Load statistics from APIs
+async function loadDashboardStats() {
+    try {
+        // Load all statistics in parallel
+        const [coursesResponse, teachersResponse, roomsResponse, groupsResponse] = await Promise.all([
+            fetch('/api/courses'),
+            fetch('/api/teachers'),
+            fetch('/api/rooms'),
+            fetch('/api/groups')
+        ]);
+        
+        const courses = await coursesResponse.json();
+        const teachers = await teachersResponse.json();
+        const rooms = await roomsResponse.json();
+        const groups = await groupsResponse.json();
+        
+        // Update statistics with animation
+        animateCounter(document.getElementById('coursesCount'), courses.length);
+        animateCounter(document.getElementById('teachersCount'), teachers.length);
+        animateCounter(document.getElementById('roomsCount'), rooms.length);
+        animateCounter(document.getElementById('groupsCount'), groups.length);
+        
+    } catch (error) {
+        console.error('Error loading dashboard statistics:', error);
+    }
+}
+
+// Animate counter from 0 to target value
+function animateCounter(element, target) {
+    let current = 0;
+    const increment = target / 30; // 30 steps for smooth animation
+    const timer = setInterval(() => {
+        current += increment;
+        if (current >= target) {
+            element.textContent = target;
+            clearInterval(timer);
+        } else {
+            element.textContent = Math.floor(current);
+        }
+    }, 50);
+}
+</script>
+{% endblock %}
+

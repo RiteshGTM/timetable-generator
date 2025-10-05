@@ -1,0 +1,226 @@
+{% extends "base.html" %}
+
+{% block title %}Generate Timetable - SmartTable{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{{ url_for('index') }}">Dashboard</a></li>
+<li class="breadcrumb-item active">Generate Timetable</li>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="page-header">
+    <div class="container-fluid">
+        <h1><i class="fas fa-bolt me-3"></i>Generate Timetable</h1>
+        <p>Use our advanced CSP algorithm to generate optimal timetables</p>
+    </div>
+</div>
+
+<!-- Data Summary Cards -->
+<div class="row mb-4">
+    <div class="col-12">
+        <h3 class="mb-3">Data Summary</h3>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="stat-card blue">
+            <div class="icon">
+                <i class="fas fa-book"></i>
+            </div>
+            <div class="number" id="coursesCount">0</div>
+            <div class="label">Courses</div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="stat-card green">
+            <div class="icon">
+                <i class="fas fa-user"></i>
+            </div>
+            <div class="number" id="teachersCount">0</div>
+            <div class="label">Teachers</div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="stat-card orange">
+            <div class="icon">
+                <i class="fas fa-door-open"></i>
+            </div>
+            <div class="number" id="roomsCount">0</div>
+            <div class="label">Rooms</div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="stat-card purple">
+            <div class="icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="number" id="groupsCount">0</div>
+            <div class="label">Groups</div>
+        </div>
+    </div>
+</div>
+
+<!-- Generation Section -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <div id="generationSection">
+                    <h2 class="mb-3">Ready to Generate Timetable</h2>
+                    <p class="text-muted mb-4">Click the button below to generate a conflict-free timetable using our CSP algorithm</p>
+                    <button class="btn btn-primary btn-lg" id="generateBtn">
+                        <i class="fas fa-magic me-2"></i>Generate Timetable
+                    </button>
+                </div>
+
+                <!-- Loading Section -->
+                <div id="loadingSection" style="display: none;">
+                    <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <h4 class="mb-2">Generating Timetable</h4>
+                    <p class="text-muted">Using CSP algorithm to find optimal solution...</p>
+                    <p class="text-muted small">Please wait, this may take a few moments</p>
+                </div>
+
+                <!-- Success Section -->
+                <div id="successSection" style="display: none;">
+                    <div class="text-success mb-3">
+                        <i class="fas fa-check-circle" style="font-size: 3rem;"></i>
+                    </div>
+                    <h4 class="text-success mb-2">Timetable Generated Successfully!</h4>
+                    <p class="text-muted mb-3" id="successMessage">Total classes scheduled: <span id="totalClasses">0</span></p>
+                    <div class="d-flex justify-content-center gap-3">
+                        <a href="{{ url_for('view_timetable') }}" class="btn btn-success">
+                            <i class="fas fa-eye me-2"></i>View Timetable
+                        </a>
+                        <button class="btn btn-outline-primary" id="generateAgainBtn">
+                            <i class="fas fa-redo me-2"></i>Generate Again
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Error Section -->
+                <div id="errorSection" style="display: none;">
+                    <div class="text-danger mb-3">
+                        <i class="fas fa-exclamation-circle" style="font-size: 3rem;"></i>
+                    </div>
+                    <h4 class="text-danger mb-2">Generation Failed</h4>
+                    <p class="text-muted mb-3" id="errorMessage">An error occurred during generation</p>
+                    <button class="btn btn-outline-danger" id="tryAgainBtn">
+                        <i class="fas fa-redo me-2"></i>Try Again
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Load data counts on page load
+document.addEventListener('DOMContentLoaded', function() {
+    loadDataCounts();
+    
+    // Event listeners
+    document.getElementById('generateBtn').addEventListener('click', generateTimetable);
+    document.getElementById('generateAgainBtn').addEventListener('click', resetGeneration);
+    document.getElementById('tryAgainBtn').addEventListener('click', resetGeneration);
+});
+
+// Load data counts from APIs
+async function loadDataCounts() {
+    try {
+        const [coursesResponse, teachersResponse, roomsResponse, groupsResponse] = await Promise.all([
+            fetch('/api/courses'),
+            fetch('/api/teachers'),
+            fetch('/api/rooms'),
+            fetch('/api/groups')
+        ]);
+        
+        const courses = await coursesResponse.json();
+        const teachers = await teachersResponse.json();
+        const rooms = await roomsResponse.json();
+        const groups = await groupsResponse.json();
+        
+        // Update counts with animation
+        animateCounter(document.getElementById('coursesCount'), courses.length);
+        animateCounter(document.getElementById('teachersCount'), teachers.length);
+        animateCounter(document.getElementById('roomsCount'), rooms.length);
+        animateCounter(document.getElementById('groupsCount'), groups.length);
+        
+    } catch (error) {
+        console.error('Error loading data counts:', error);
+    }
+}
+
+// Generate timetable
+async function generateTimetable() {
+    const generateBtn = document.getElementById('generateBtn');
+    const generationSection = document.getElementById('generationSection');
+    const loadingSection = document.getElementById('loadingSection');
+    const successSection = document.getElementById('successSection');
+    const errorSection = document.getElementById('errorSection');
+    
+    // Show loading, hide generation section
+    generationSection.style.display = 'none';
+    loadingSection.style.display = 'block';
+    errorSection.style.display = 'none';
+    successSection.style.display = 'none';
+    
+    try {
+        const response = await fetch('/api/generate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            // Show success section
+            loadingSection.style.display = 'none';
+            successSection.style.display = 'block';
+            
+            // Update success message
+            document.getElementById('totalClasses').textContent = result.summary.total_assignments;
+            
+        } else {
+            // Show error section
+            loadingSection.style.display = 'none';
+            errorSection.style.display = 'block';
+            document.getElementById('errorMessage').textContent = result.message || 'An error occurred during generation';
+        }
+        
+    } catch (error) {
+        // Show error section
+        loadingSection.style.display = 'none';
+        errorSection.style.display = 'block';
+        document.getElementById('errorMessage').textContent = 'Network error: ' + error.message;
+    }
+}
+
+// Reset generation interface
+function resetGeneration() {
+    document.getElementById('generationSection').style.display = 'block';
+    document.getElementById('loadingSection').style.display = 'none';
+    document.getElementById('successSection').style.display = 'none';
+    document.getElementById('errorSection').style.display = 'none';
+}
+
+// Animate counter from 0 to target value
+function animateCounter(element, target) {
+    let current = 0;
+    const increment = target / 30;
+    const timer = setInterval(() => {
+        current += increment;
+        if (current >= target) {
+            element.textContent = target;
+            clearInterval(timer);
+        } else {
+            element.textContent = Math.floor(current);
+        }
+    }, 50);
+}
+</script>
+{% endblock %}
+
