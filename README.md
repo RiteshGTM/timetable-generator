@@ -31,8 +31,8 @@ A modern, intelligent timetable generation system for colleges and universities 
 
 1. **Clone or download the project**
    ```bash
-   git clone <repository-url>
-   cd college-timetable-generator
+   git clone <https://github.com/RiteshGTM/timetable-generator.git>
+   cd timetable-generator
    ```
 
 2. **Install dependencies**
